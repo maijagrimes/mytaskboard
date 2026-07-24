@@ -10,13 +10,6 @@ const DEFAULT_COLUMN_COLORS = {
     'Done': '#65da78',
 }
 
-// Load in options for new user avatar
-const AVATAR_FILES = Object.values(avatarModules)
-const avatarModules = import.meta.glob('/src/assets/footer-icons/*.{png,jpg,jpeg,svg}', {
-    eager: true,
-    import: 'default',
-})
-
 function TaskCard({ task, onClick }) {
     const { isDragging, ref } = useDraggable({ id: task.id })
 
@@ -161,6 +154,13 @@ function pickAvatar(userId) {
     const index = hash % AVATAR_FILES.length
     return AVATAR_FILES[index]
 }
+
+// Load in options for new user avatar
+const avatarModules = import.meta.glob('/src/assets/footer-icons/*.{png,jpg,jpeg,svg}', {
+    eager: true,
+    import: 'default',
+})
+const AVATAR_FILES = Object.values(avatarModules)
 
 export function ProfileMenu({ claims, onLogout }) {
     const [open, setOpen] = useState(false)
