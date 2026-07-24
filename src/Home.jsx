@@ -3,11 +3,28 @@ import { DragDropProvider, useDraggable, useDroppable } from '@dnd-kit/react'
 import supabase from './supabaseClient'
 import './index.css'
 
-function Draggable({ id, children }) {
-    const { isDragging, ref } = useDraggable({ id })
+function TaskCard({ task, onClick }) {
+    const { isDragging, ref } = useDraggable({ id: task.id })
+
+    let dueLabel = null
+    if (task.due_date) {
+        if (isOverdue(task.due_date)) dueLabel = 'Overdue'
+        else if (isDueSoon(task.due_date)) dueLabel = 'Due soon'
+        else dueLabel = new Date(task.due_date).toLocaleDateString()
+    }
+
     return (
-        <div ref={ref} className={`task-card ${isDragging ? 'dragging' : ''}`}>
-        {children}
+        <div
+            ref={ref}
+            className={`task-card ${isDragging ? 'dragging' : ''}`}
+            onClick={onClick}
+        >
+            <div className="task-title">{task.title}</div>
+            {dueLabel && (
+                <div className={`task-due-tag ${isOverdue(task.due_date) ? 'overdue' : isDueSoon(task.due_date) ? 'due-soon' : ''}`}>
+                    {dueLabel}
+                </div>
+            )}
         </div>
     )
 }
@@ -34,7 +51,22 @@ function Droppable({ id, children, color, onColorChange  }) {
     )
 }
 
-function EditTaskForm({ task, columns, onTaskUpdated, onCancel }) {
+function isOverdue(dueDate) {
+    if (!dueDate) return false
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    const due = new Date(dueDate); due.setHours(0, 0, 0, 0)
+    return due < today
+}
+
+function isDueSoon(dueDate) {
+    if (!dueDate) return false
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    const due = new Date(dueDate); due.setHours(0, 0, 0, 0)
+    const diffDays = (due - today) / (1000 * 60 * 60 * 24)
+    return diffDays >= 0 && diffDays <= 2
+}
+
+function EditTaskForm({ task, columns, onTaskUpdated, onCancel, onDelete }) {
     const [formData, setFormData] = useState({
         title: task.title,
         status: task.status,
@@ -63,6 +95,7 @@ function EditTaskForm({ task, columns, onTaskUpdated, onCancel }) {
             .single()
 
         if (error) {
+            setErrorMessage('Failed to update task. Please try again.')
             console.error('Failed to update task:', error)
             return
         }
@@ -71,7 +104,7 @@ function EditTaskForm({ task, columns, onTaskUpdated, onCancel }) {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="task-card" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <form onSubmit={handleSubmit} className="task-card">
             <input
                 type="text"
                 className='task-title-input'
@@ -96,8 +129,11 @@ function EditTaskForm({ task, columns, onTaskUpdated, onCancel }) {
                 onChange={handleChange('description')}
             />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                <button type="submit">Save</button>
-                <button type="button" onClick={onCancel}>Cancel</button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <button type="submit">Save</button>
+                    <button type="button" onClick={onCancel}>Cancel</button>
+                </div>
+                <button type="button" onClick={() => onDelete(task.id)}>🗑️</button>
             </div>
         </form>
     )
@@ -163,10 +199,10 @@ export function ProfileMenu({ claims, onLogout }) {
     )
 }
 
-function NewTaskForm({ userId, columns, onTaskCreated, onCancel }) {
+function NewTaskForm({ userId, columns, defaultStatus, onTaskCreated, onCancel }) {
     const [formData, setFormData] = useState({
         title: '',
-        status: '',
+        status: defaultStatus || '',
         due_date: '',
         description: '',
     })
@@ -175,9 +211,12 @@ function NewTaskForm({ userId, columns, onTaskCreated, onCancel }) {
         setFormData((prev) => ({ ...prev, [field]: event.target.value }))
     }
 
+    const [saving, setSaving] = useState(false)
+
     const handleSubmit = async (event) => {
         event.preventDefault()
         if (!formData.title.trim()) return
+        setSaving(true)
 
         const { data, error } = await supabase
             .from('tasks')
@@ -191,17 +230,19 @@ function NewTaskForm({ userId, columns, onTaskCreated, onCancel }) {
             .select()
             .single()
 
+        setSaving(false)
+
         if (error) {
+            setErrorMessage('Failed to add task. Please try again.')
             console.error('Failed to add task:', error)
             return
         }
 
         onTaskCreated(data)
-        setFormData({ title: '', status: '', due_date: '', description: '' })
     }
 
     return (
-        <form onSubmit={handleSubmit} style={{ marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 320 }}>
+        <form onSubmit={handleSubmit} className='task-card'>
             <input
                 type="text"
                 className='task-title-input'
@@ -229,7 +270,9 @@ function NewTaskForm({ userId, columns, onTaskCreated, onCancel }) {
                 onChange={handleChange('description')}
             />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
-                <button type="submit">Add Task</button>
+                <button type="submit" disabled={saving}>
+                    {saving ? 'Adding…' : 'Add Task'}
+                </button>
                 <button type="button" onClick={onCancel}>Cancel</button>
             </div>
         </form>
@@ -243,32 +286,92 @@ const DEFAULT_COLUMN_COLORS = {
     'Done': '#65da78',
 }
 
+function Column({
+    id, color, onColorChange, tasks,
+    editingTaskId, onTaskClick, onTaskUpdated, onTaskDeleted, onCancelEdit,
+    columns, userId, isAdding, onStartAdd, onCancelAdd, onTaskCreated,
+}) {
+    const { isDropTarget, ref } = useDroppable({ id })
+
+    return (
+        <div ref={ref} className="column" style={{ boxShadow: isDropTarget ? `0 0 7px 7px ${color}` : 'none' }}>
+            <div className="column-header">
+                <input
+                    type="color"
+                    className="column-color-dot"
+                    value={color}
+                    onChange={(e) => onColorChange(id, e.target.value)}
+                />
+                <h3>{id}</h3>
+            </div>
+
+            <div className="column-tasklist">
+                {tasks.map((t) =>
+                    editingTaskId === t.id ? (
+                        <EditTaskForm
+                            key={t.id}
+                            task={t}
+                            columns={columns}
+                            onTaskUpdated={onTaskUpdated}
+                            onCancel={onCancelEdit}
+                            onDelete={onTaskDeleted}
+                        />
+                    ) : (
+                        <TaskCard key={t.id} task={t} onClick={() => onTaskClick(t)} />
+                    )
+                )}
+            </div>
+
+            {isAdding ? (
+                <NewTaskForm
+                    userId={userId}
+                    columns={columns}
+                    defaultStatus={id}
+                    onTaskCreated={onTaskCreated}
+                    onCancel={onCancelAdd}
+                />
+            ) : (
+                <button className="column-add-button" onClick={onStartAdd}>+ Add Task</button>
+            )}
+        </div>
+    )
+}
+
 function Taskboard({ userId }) {
     const columns = ['To Do', 'In Progress', 'In Review', 'Done']
     const [tasks, setTasks] = useState([])
-    const [showForm, setShowForm] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState(null)
+    const [addingToColumn, setAddingToColumn] = useState(null)
     const [editingTask, setEditingTask] = useState(null)
     const [columnColors, setColumnColors] = useState(DEFAULT_COLUMN_COLORS)
-
-    const handleColorChange = (columnName, newColor) => {
-        setColumnColors((prev) => ({ ...prev, [columnName]: newColor }))
-    }
+    const [errorMessage, setErrorMessage] = useState(null)
 
     // Fetch this user's tasks on mount
     useEffect(() => {
+        setLoading(true)
+        setLoadError(null)
         supabase
         .from('tasks')
         .select('*')
         .eq('user_id', userId)
         .then(({ data, error }) => {
-            if (error) console.error(error)
-            else setTasks(data)
+            if (error) { 
+                setLoadError(error.message)
+                console.error(error) 
+            }
+            else { setTasks(data) }
+            setLoading(false)
         })
     }, [userId])
 
+    const handleColorChange = (columnName, newColor) => {
+        setColumnColors((prev) => ({ ...prev, [columnName]: newColor }))
+    }
+
     const handleTaskCreated = (newTask) => {
         setTasks((prev) => [...prev, newTask])
-        setShowForm(false)
+        setAddingToColumn(null)
     }
 
     const handleDeleteTask = async (taskId) => {
@@ -278,11 +381,13 @@ function Taskboard({ userId }) {
             .eq('id', taskId)
 
         if (error) {
+            setErrorMessage('Failed to delete task. Please try again.')
             console.error('Failed to delete task:', error)
             return
         }
 
         setTasks((prev) => prev.filter((t) => t.id !== taskId))
+        setEditingTask(null)
     }
 
     const handleTaskUpdated = (updatedTask) => {
@@ -307,52 +412,50 @@ function Taskboard({ userId }) {
             .update({ status: newStatus })
             .eq('id', taskId)
 
-        if (error) console.error('Failed to update task:', error)
+        if (error) { 
+            setErrorMessage('Failed to update task. Please try again.')
+            console.error('Failed to update task:', error)
+        }
+    }
+
+    if (loading) {
+        return <div className="board-status">Loading your tasks…</div>
+    }
+
+    if (loadError) {
+        return (
+            <div className="board-status board-error">
+                <p>Couldn't load your tasks: {loadError}</p>
+                <button onClick={() => window.location.reload()}>Try again</button>
+            </div>
+        )
     }
 
     return (
-    <>
         <DragDropProvider onDragEnd={handleDragEnd}>
-            <div className='column-box'>
+            <div className="column-box">
                 {columns.map((col) => (
-                    <Droppable key={col} id={col} color={columnColors[col]} onColorChange={handleColorChange}>
-                    {tasks
-                    .filter((t) => t.status === col)
-                    .map((t) => 
-                        editingTask?.id === t.id ? (
-                            <EditTaskForm
-                                key={t.id}
-                                task={t}
-                                columns={columns}
-                                onTaskUpdated={handleTaskUpdated}
-                                onCancel={() => setEditingTask(null)}
-                            />
-                        ) : (
-                        <Draggable key={t.id} id={t.id}>
-                            <div className="task-title">{t.title}</div>
-                            {t.description && <div className="task-description">{t.description}</div>}
-                            <div className="task-actions">
-                                <button onClick={() => setEditingTask(t)}>✏️</button>
-                                <button onClick={() => handleDeleteTask(t.id)}>🗑️</button>
-                            </div>
-                        </Draggable>
-                    ))}
-                </Droppable>
+                    <Column
+                        key={col}
+                        id={col}
+                        color={columnColors[col]}
+                        onColorChange={handleColorChange}
+                        tasks={tasks.filter((t) => t.status === col)}
+                        editingTaskId={editingTask?.id}
+                        onTaskClick={(t) => setEditingTask(t)}
+                        onTaskUpdated={handleTaskUpdated}
+                        onTaskDeleted={handleDeleteTask}
+                        onCancelEdit={() => setEditingTask(null)}
+                        columns={columns}
+                        userId={userId}
+                        isAdding={addingToColumn === col}
+                        onStartAdd={() => setAddingToColumn(col)}
+                        onCancelAdd={() => setAddingToColumn(null)}
+                        onTaskCreated={handleTaskCreated}
+                    />
                 ))}
             </div>
         </DragDropProvider>
-
-        {showForm ? (
-            <NewTaskForm
-                userId={userId}
-                columns={columns}
-                onTaskCreated={handleTaskCreated}
-                onCancel={() => setShowForm(false)}
-            />
-        ) : (
-            <button className='new-task-button' onClick={() => setShowForm(true)}>New Task</button>
-        )}
-    </>
     )
 }
 

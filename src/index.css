@@ -59,31 +59,51 @@ body {
     width: 100%;
 }
 
+.board-status {
+    align-self: center;
+    padding: 40px;
+}
+
+.error-banner {
+    background: #fff5f5;
+    border: 1px solid #ffc9c9;
+    color: #c92a2a;
+    padding: 10px 14px;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.error-banner button {
+    background: none;
+    border: none;
+    color: #c92a2a;
+    cursor: pointer;
+    font-weight: bold;
+}
+
 .column-box {
     display: flex;
-    align-items: flex-start;
-    gap: 22px;
-    width: 90%;
-    max-width: 2000px;
-    justify-content: space-around;
+    gap: 12px;
     align-self: center;
-    margin: 15px;
-    padding-top: 4%;
-    border-radius: 10px;
-    flex-shrink: 0;
+    width: 80%;
+    max-width: 2000px;
+    justify-content: center;
+    margin: 20px;
+
 }
 
 .column {
-    background: rgba(255, 255, 255, 0.666);
-    border: 2px solid rgba(0, 0, 0, 0.719);
-    border-radius: 8px;
-    padding: 12px;
-    min-width: 20%;
-    min-height: 320px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    transition: background 0.15s ease;
+    height: 70vh; /* adjust to taste */
+    background: #f8f9fab0;
+    border-radius: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+    flex: 1;
 }
 
 .column.drop-target {
@@ -95,7 +115,22 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 13px;
+    flex-shrink: 0;
+}
+
+.column-tasklist {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0; /* see note below — this is the part that's easy to miss */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.column-add-button {
+    flex-shrink: 0;
+    margin-top: 8px;
 }
 
 .column-color-dot {
@@ -133,8 +168,9 @@ body {
 
 .task-title-input, .task-description-input, .task-select-text, task-date-input, input {
     font-family: 'Short', auto;
-    font-size: large;
-    border: none;
+    font-size: medium;
+    border: 1px solid rgba(0, 0, 0, 0.086);
+    border-radius: 8px;
     padding: 5px;
 }
 
@@ -192,6 +228,23 @@ body {
 
 .task-actions button:hover {
     opacity: 1;
+}
+
+.task-due-tag {
+    font-size: 11px;
+    color: #868e96;
+    margin-top: 4px;
+    margin-left: 7px;
+}
+
+.task-due-tag.due-soon {
+    color: #f08c00;
+    font-weight: 600;
+}
+
+.task-due-tag.overdue {
+    color: #e03131;
+    font-weight: 600;
 }
 
 .profile-menu {
@@ -256,16 +309,17 @@ h3, p {
 
 form {
     border: 1px solid;
-    padding: 15px;
-    margin: 20px;
+    width: stretch;
     margin-bottom: 30px;
     align-self: center;
     border-radius: 8px;
+    padding: 10px;
+    gap: 6px;
 }
 
 button {
     font-family: 'Short', auto;
-    font-size: large;
+    font-size: medium;
     border: none;
     background: none;
     cursor: pointer;
