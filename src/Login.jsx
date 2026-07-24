@@ -60,10 +60,10 @@ export default function Login({ verifying, authError, setAuthError, authSuccess,
 
   return (
     <div>
-      <h1>Supabase + React</h1>
-      <p>Sign in via magic link with your email below</p>
-      <form onSubmit={handleLogin}>
+      <p style={{padding: 10}}>Sign in via magic link with your email below</p>
+      <form style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}} onSubmit={handleLogin}>
         <input
+          style={{flex: 1}}
           type="email"
           placeholder="Your email"
           value={email}

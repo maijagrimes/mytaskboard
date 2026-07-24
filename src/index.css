@@ -310,3 +310,8 @@
         margin: 2px 5px 6px;
         font-size: 14px;
     }
+
+/* Loading Style */
+.board-status {
+    align-self: center;
+}

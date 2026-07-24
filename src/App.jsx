@@ -72,7 +72,7 @@ export default function App() {
       
       <div className='front-main'>
         {authLoading ? (
-          <div className="board-status" style={{alignSelf: 'center', padding: 40}}>Loading…</div>
+          <div className="board-status" style={{ alignSelf: 'center', padding: 40 }}>Loading…</div>
         ) : claims ? (
           <Home claims={claims} onLogout={handleLogout} />
         ) : (
