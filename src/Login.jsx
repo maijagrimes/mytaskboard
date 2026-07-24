@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import supabase from './supabaseClient'
 
+// All code on this page from supabase docs
 export default function Login({ verifying, authError, setAuthError, authSuccess, claims }) {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')

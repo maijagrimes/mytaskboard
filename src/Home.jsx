@@ -3,6 +3,20 @@ import { DragDropProvider, useDraggable, useDroppable } from '@dnd-kit/react'
 import supabase from './supabaseClient'
 import './index.css'
 
+const DEFAULT_COLUMN_COLORS = {
+    'To Do': '#f4756a',
+    'In Progress': '#f06fd2',
+    'In Review': '#5893f1',
+    'Done': '#65da78',
+}
+
+// Load in options for new user avatar
+const AVATAR_FILES = Object.values(avatarModules)
+const avatarModules = import.meta.glob('/src/assets/footer-icons/*.{png,jpg,jpeg,svg}', {
+    eager: true,
+    import: 'default',
+})
+
 function TaskCard({ task, onClick }) {
     const { isDragging, ref } = useDraggable({ id: task.id })
 
@@ -139,13 +153,6 @@ function EditTaskForm({ task, columns, onTaskUpdated, onCancel, onDelete }) {
     )
 }
 
-const avatarModules = import.meta.glob('/src/assets/footer-icons/*.{png,jpg,jpeg,svg}', {
-    eager: true,
-    import: 'default',
-})
-
-const AVATAR_FILES = Object.values(avatarModules)
-
 function pickAvatar(userId) {
     let hash = 0
     for (let i = 0; i < userId.length; i++) {
@@ -277,13 +284,6 @@ function NewTaskForm({ userId, columns, defaultStatus, onTaskCreated, onCancel }
             </div>
         </form>
     )
-}
-
-const DEFAULT_COLUMN_COLORS = {
-    'To Do': '#f4756a',
-    'In Progress': '#f06fd2',
-    'In Review': '#5893f1',
-    'Done': '#65da78',
 }
 
 function Column({
@@ -459,11 +459,11 @@ function Taskboard({ userId }) {
     )
 }
 
+// Loads the taskboard
 export default function Home({ claims, onLogout }) {
     return (
         <>
             <div className='main'><Taskboard userId={claims.sub} /></div>
-            
-    </>
+        </>
     )
 }
