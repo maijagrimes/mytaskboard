@@ -1,0 +1,42 @@
+.marquee-footer {
+  width: 100%;
+  overflow: hidden;
+  background: transparent;
+  margin-top: 3%;
+  padding-bottom: 1%;
+  position: relative;
+  bottom: 0px;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation-name: scroll-left;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Pause on hover — remove this block if you don't want it */
+.marquee-footer:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-img {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+  margin: 0 20px;
+  flex-shrink: 0;
+  image-rendering: pixelated; /* nice for retro/pixel art icons */
+  user-select: none;
+}
+
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* -50% because the track is 2x the images, duplicated */
+    transform: translateX(-50%);
+  }
+}

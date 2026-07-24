@@ -1,122 +1,79 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import './index.css'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import supabase from './supabaseClient'
+import Login from './Login'
+import Home from './Home'
+import MarqueeFooter from './MarqueeFooter'
+import { ProfileMenu } from './Home'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [claims, setClaims] = useState(null)
+
+  const params = new URLSearchParams(window.location.search)
+  const hasTokenHash = params.get('token_hash')
+
+  const [verifying, setVerifying] = useState(!!hasTokenHash)
+  const [authError, setAuthError] = useState(null)
+  const [authSuccess, setAuthSuccess] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const token_hash = params.get('token_hash')
+    const type = params.get('type')
+
+    if (token_hash) {
+      supabase.auth
+        .verifyOtp({ token_hash, type: type || 'email' })
+        .then(({ error }) => {
+          if (error) {
+            setAuthError(error.message)
+          } else {
+            setAuthSuccess(true)
+            window.history.replaceState({}, document.title, '/')
+          }
+          setVerifying(false)
+        })
+    }
+
+    supabase.auth.getClaims().then(({ data }) => {
+      setClaims(data?.claims ?? null)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      supabase.auth.getClaims().then(({ data }) => {
+        setClaims(data?.claims ?? null)
+      })
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setClaims(null)
+  }
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+      <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+        <h1>myTaskboard</h1>
+        <ProfileMenu claims={claims} onLogout={handleLogout} />
+      </div>
+      
+      <div className='front-main'>
+      {claims ? (
+        <Home claims={claims} onLogout={handleLogout} />
+      ) : (
+        <Login
+          verifying={verifying}
+          authError={authError}
+          setAuthError={setAuthError}
+          authSuccess={authSuccess}
+          claims={claims}
+        />
+      )}
+      </div>
+      <MarqueeFooter />
     </>
   )
 }
-
-export default App
