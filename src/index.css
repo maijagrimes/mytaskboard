@@ -63,8 +63,8 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 22px;
-    width: 85%;
-    max-width: 1300px;
+    width: 90%;
+    max-width: 2000px;
     justify-content: space-around;
     align-self: center;
     margin: 15px;
@@ -75,7 +75,7 @@ body {
 
 .column {
     background: rgba(255, 255, 255, 0.666);
-    border: 2px solid black;
+    border: 2px solid rgba(0, 0, 0, 0.719);
     border-radius: 8px;
     padding: 12px;
     min-width: 20%;
@@ -87,8 +87,37 @@ body {
 }
 
 .column.drop-target {
-    background: rgba(255, 255, 255, 0.665);
-    border-color: rgba(255, 255, 255, 0.077);
+    background: rgba(255, 255, 255, 0.866);
+}
+
+.column-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.column-color-dot {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgb(0, 0, 0);
+    padding: 0;
+    cursor: pointer;
+    background: none;
+}
+
+.column-color-dot::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border-radius: 50%;
+}
+
+.column-color-dot::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
 }
 
 .new-task-button {
@@ -172,8 +201,7 @@ body {
 
 .profile-avatar-button {
     background: white;
-    border: 1px solid white;
-    padding: 0;
+    padding: 10px;
     cursor: pointer;
     border-radius: 50%;
     overflow: hidden;
@@ -209,7 +237,7 @@ body {
 }
 
 .profile-dropdown p {
-    margin: 0 0 6px;
+    margin: 2px 5px 6px;
     font-size: 14px;
 }
 

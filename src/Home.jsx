@@ -12,11 +12,23 @@ function Draggable({ id, children }) {
     )
 }
 
-function Droppable({ id, children }) {
+function Droppable({ id, children, color, onColorChange  }) {
     const { isDropTarget, ref } = useDroppable({ id })
     return (
-        <div ref={ref} className={`column ${isDropTarget ? 'drop-target' : ''}`}>
-        <h3>{id}</h3>
+        <div 
+            ref={ref} 
+            className="column"
+            style={{ boxShadow: isDropTarget ? `0 0 7px 7px ${color}` : 'none', }}
+        >
+        <div className="column-header">
+            <input
+                type="color"
+                className="column-color-dot"
+                value={color}
+                onChange={(e) => onColorChange(id, e.target.value)}
+            />
+            <h3>{id}</h3>
+        </div>
         {children}
         </div>
     )
@@ -224,11 +236,23 @@ function NewTaskForm({ userId, columns, onTaskCreated, onCancel }) {
     )
 }
 
+const DEFAULT_COLUMN_COLORS = {
+    'To Do': '#f4756a',
+    'In Progress': '#f06fd2',
+    'In Review': '#5893f1',
+    'Done': '#65da78',
+}
+
 function Taskboard({ userId }) {
     const columns = ['To Do', 'In Progress', 'In Review', 'Done']
     const [tasks, setTasks] = useState([])
     const [showForm, setShowForm] = useState(false)
     const [editingTask, setEditingTask] = useState(null)
+    const [columnColors, setColumnColors] = useState(DEFAULT_COLUMN_COLORS)
+
+    const handleColorChange = (columnName, newColor) => {
+        setColumnColors((prev) => ({ ...prev, [columnName]: newColor }))
+    }
 
     // Fetch this user's tasks on mount
     useEffect(() => {
@@ -291,7 +315,7 @@ function Taskboard({ userId }) {
         <DragDropProvider onDragEnd={handleDragEnd}>
             <div className='column-box'>
                 {columns.map((col) => (
-                    <Droppable key={col} id={col}>
+                    <Droppable key={col} id={col} color={columnColors[col]} onColorChange={handleColorChange}>
                     {tasks
                     .filter((t) => t.status === col)
                     .map((t) => 
