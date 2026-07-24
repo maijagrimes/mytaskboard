@@ -30,8 +30,8 @@
 
 body {
     font-family: 'Short', auto;
-    background-image:   repeating-linear-gradient(to right, transparent, transparent 20px, lightblue 21px, blue 21px),
-                        repeating-linear-gradient(to bottom, transparent, transparent 20px, lightblue 21px, blue 21px);
+    background-image:   repeating-linear-gradient(to right, transparent, transparent 20px, lightblue 21px, lightblue 21px),
+                        repeating-linear-gradient(to bottom, transparent, transparent 20px, lightblue 21px, lightblue 21px);
 
 }
 
