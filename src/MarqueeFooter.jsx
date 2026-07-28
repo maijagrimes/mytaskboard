@@ -7,7 +7,7 @@ import "./MarqueeFooter.css";
 // (Put the folder in src/assets since Vite needs it there to process
 // the glob — see the note below about public/ if yours must live there.)
 const iconModules = import.meta.glob(
-  "/src/assets/footer-icons/*.{png,jpg,jpeg,gif,svg,webp}",
+  "/src/assets/stars/*.{png,jpg,jpeg,gif,svg,webp,ico}",
   { eager: true, import: "default" }
 );
 
