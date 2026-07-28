@@ -10,7 +10,12 @@ const DEFAULT_COLUMN_COLORS = {
     'Done': '#65da78',
 }
 
-function TaskCard({ task, onClick }) {
+const COLORS = {
+    1 : 'rgb(63, 114, 181)',
+    2 : 'rgb(96, 193, 63)',
+}
+
+function TaskCard({ task, onClick, color }) {
     const { isDragging, ref } = useDraggable({ id: task.id })
 
     let dueLabel = null
@@ -156,7 +161,7 @@ function pickAvatar(userId) {
 }
 
 // Load in options for new user avatar
-const avatarModules = import.meta.glob('/src/assets/footer-icons/*.{png,jpg,jpeg,svg}', {
+const avatarModules = import.meta.glob('/src/assets/stars/*.{png,jpg,jpeg,svg,ico}', {
     eager: true,
     import: 'default',
 })
