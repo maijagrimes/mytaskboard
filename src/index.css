@@ -73,6 +73,10 @@
         cursor: pointer;
     }
 
+    button::hover {
+        background-color: white;
+    }
+
 /* Error Styling */
 
     .error-banner {
@@ -135,7 +139,7 @@
     .column-tasklist {
         flex: 1;
         overflow-y: auto;
-        min-height: 0; /* see note below — this is the part that's easy to miss */
+        min-height: 0; 
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -187,6 +191,7 @@
         border: 1px solid rgba(0, 0, 0, 0.086);
         border-radius: 8px;
         padding: 5px;
+        
     }
 
     .task-card {
@@ -207,6 +212,7 @@
         font-weight: 400; font-size: medium;
         margin-left: 5px;
         margin-bottom: 5px;
+        overflow: visible;
     }
 
     .task-description {

@@ -6,8 +6,59 @@ import Home from './Home'
 import MarqueeFooter from './MarqueeFooter'
 import { ProfileMenu } from './Home'
 
+function SaveTasksPrompt({ userId }) {
+    const [email, setEmail] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [sent, setSent] = useState(false)
+    const [error, setError] = useState(null)
+
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+        setLoading(true)
+        setError(null)
+
+        const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: { emailRedirectTo: window.location.origin },
+        })
+
+        setLoading(false)
+        if (error) {
+            setError(error.message)
+        } else {
+            setSent(true)
+        }
+    }
+
+    if (sent) {
+        return <p style={{fontSize: 'medium'}}>Check your email for a link to continue.</p>
+    }
+
+    return (
+        <form
+            style={{ width: '35%', marginBottom: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', border: 'none' }}
+            onSubmit={handleSubmit}
+        >
+            <input
+                style={{ width: 'auto', flex: 1, padding: '10px' }}
+                type="email"
+                placeholder="Enter your email to sign in via Magic Link"
+                value={email}
+                required
+                onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="submit" disabled={loading}>
+                {loading ? 'Sending…' : 'Send'}
+            </button>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+        </form>
+    )
+}
+
 export default function App() {
   const [claims, setClaims] = useState(null)
+  const isAnonymous = claims?.is_anonymous ?? true
 
   // Check URL params on initial render
   const params = new URLSearchParams(window.location.search)
@@ -41,8 +92,19 @@ export default function App() {
     }
 
     // Check for existing session using getClaims + end loading screen when done
-    supabase.auth.getClaims().then(({ data }) => {
-      setClaims(data?.claims ?? null)
+    supabase.auth.getClaims().then(async ({ data }) => {
+      if (data?.claims) {
+        setClaims(data.claims)
+      } else {
+        // No session at all — sign in anonymously so they can start using the board right away
+        const { data: anonData, error } = await supabase.auth.signInAnonymously()
+        if (error) {
+          console.error('Anonymous sign-in failed:', error)
+        } else {
+          const { data: claimsData } = await supabase.auth.getClaims()
+          setClaims(claimsData?.claims ?? null)
+        }
+      }
       setAuthLoading(false)
     })
 
@@ -67,22 +129,14 @@ export default function App() {
     <>
       <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
         <h1>myTaskboard</h1>
-        <ProfileMenu claims={claims} onLogout={handleLogout} />
+        {isAnonymous ? <SaveTasksPrompt userId={claims?.sub} /> : <ProfileMenu claims={claims} onLogout={handleLogout} />}
       </div>
       
       <div className='front-main'>
         {authLoading ? (
           <div className="board-status" style={{ alignSelf: 'center', padding: 40 }}>Loading…</div>
-        ) : claims ? (
-          <Home claims={claims} onLogout={handleLogout} />
         ) : (
-          <Login
-            verifying={verifying}
-            authError={authError}
-            setAuthError={setAuthError}
-            authSuccess={authSuccess}
-            claims={claims}
-          />
+          <Home claims={claims} onLogout={handleLogout} />
         )}
       </div>
       <MarqueeFooter />
