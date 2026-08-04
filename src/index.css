@@ -106,8 +106,8 @@
         display: flex;
         gap: 12px;
         align-self: center;
-        width: 80%;
-        max-width: 2000px;
+        width: 95%;
+        max-width: 1400px;
         justify-content: center;
         margin: 20px;
     }

@@ -283,7 +283,7 @@ function NewTaskForm({ userId, columns, defaultStatus, onTaskCreated, onCancel }
             />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between' }}>
                 <button type="submit" disabled={saving}>
-                    {saving ? 'Adding…' : 'Add Task'}
+                    {saving ? 'Adding…' : 'Add'}
                 </button>
                 <button type="button" onClick={onCancel}>Cancel</button>
             </div>
