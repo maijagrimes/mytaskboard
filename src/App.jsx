@@ -36,22 +36,22 @@ function SaveTasksPrompt({ userId }) {
 
     return (
         <form
-            style={{ width: '35%', marginBottom: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', border: 'none' }}
+            style={{ width: 'clamp(320px, 330px, 380px)', marginBottom: 0, display: 'flex', gap: '8px', alignItems: 'center', border: 'none' }}
             onSubmit={handleSubmit}
         >
             <input
-                style={{ width: 'auto', flex: 1, padding: '10px', minWidth: '300px' }}
+                style={{ flex: 1, minWidth: 0, padding: '10px' }}
                 type="email"
-                placeholder="Enter your email to sign in via Magic Link"
+                placeholder="Enter your email to sign in"
                 value={email}
                 required
                 onChange={(e) => setEmail(e.target.value)}
             />
-            <button type="submit" disabled={loading}>
+            <button type="submit" disabled={loading} style={{ flexShrink: 0 }}>
                 {loading ? 'Sending…' : 'Send'}
             </button>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p style={{ color: 'red', width: '100%', margin: 0 }}>{error}</p>}
         </form>
     )
 }

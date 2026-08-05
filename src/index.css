@@ -51,7 +51,7 @@
     h3, p {
         margin: 0px;
         align-self: center;
-        font-size: x-large;
+        font-size: 1rem;
         font-weight: 500;
     }
 
@@ -153,8 +153,8 @@
     .column-color-dot {
         -webkit-appearance: none;
         appearance: none;
-        width: 18px;
-        height: 18px;
+        width: 15px;
+        height: 15px;
         border-radius: 50%;
         border: 2px solid rgb(0, 0, 0);
         padding: 0;
