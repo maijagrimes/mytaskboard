@@ -139,7 +139,6 @@ export default function App() {
           <Home claims={claims} onLogout={handleLogout} />
         )}
       </div>
-      <MarqueeFooter />
     </>
   )
 }
