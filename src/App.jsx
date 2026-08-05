@@ -40,7 +40,7 @@ function SaveTasksPrompt({ userId }) {
             onSubmit={handleSubmit}
         >
             <input
-                style={{ width: 'auto', flex: 1, padding: '10px' }}
+                style={{ width: 'auto', flex: 1, padding: '10px', minWidth: '300px' }}
                 type="email"
                 placeholder="Enter your email to sign in via Magic Link"
                 value={email}
