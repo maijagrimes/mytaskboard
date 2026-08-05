@@ -27,7 +27,8 @@
 
     .front-main {
         flex: 1;
-        align-content: center;
+        padding-top: 10px;
+        align-content: flex-start;
         justify-items: center;
     }
 
