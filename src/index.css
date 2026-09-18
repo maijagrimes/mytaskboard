@@ -104,8 +104,8 @@
 
     /* Surrounds all of the columns */
     .column-box {
-        display: flex;
-        gap: 12px;
+        display: flex; flex-wrap: wrap; flex: 1;
+        gap: 20px;
         align-self: center;
         width: 95%;
         max-width: 1400px;
@@ -116,12 +116,13 @@
     .column {
         display: flex;
         flex-direction: column;
-        height: 70vh; 
+        min-height: max-content; 
         background: #f8f9fab0;
         border-radius: 8px;
         padding: 12px;
         box-sizing: border-box;
         flex: 1;
+        min-width: 300px;
     }
 
     .column.drop-target {

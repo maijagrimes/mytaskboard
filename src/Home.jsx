@@ -299,7 +299,7 @@ function Column({
     const { isDropTarget, ref } = useDroppable({ id })
 
     return (
-        <div ref={ref} className="column" style={{ boxShadow: isDropTarget ? `0 0 7px 7px ${color}` : 'none' }}>
+        <div ref={ref} className="column" style={{ boxShadow: isDropTarget ? `0 0 7px 7px ${color}` : 'none', border: `3px solid ${color}` }}>
             <div className="column-header">
                 <input
                     type="color"
