@@ -186,6 +186,10 @@
         border-radius: 4px;
         cursor: pointer;
     }
+    
+    .task-title-input {
+        flex: 3;
+    }
 
     .task-title-input, .task-description-input, .task-select-text, task-date-input, input {
         font-family: 'Short', auto;
@@ -326,4 +330,18 @@
 /* Loading Style */
 .board-status {
     align-self: center;
+}
+
+.emoji-section {
+    width: min-content; 
+    border: 1px solid rgb(227, 227, 227); border-radius: 8px;
+    padding: 0 8px 0 8px;
+    margin-right: 7px;
+}
+
+emoji-picker {
+    --background: rgb(255, 255, 255);
+    --border-radius: 8px;
+    --input-border-color: rgb(227, 227, 227);
+    --outline-color: black;
 }

@@ -3,7 +3,6 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import supabase from './supabaseClient'
 import Login from './Login'
 import Home from './Home'
-import MarqueeFooter from './MarqueeFooter'
 import { ProfileMenu } from './Home'
 
 function SaveTasksPrompt({ userId }) {

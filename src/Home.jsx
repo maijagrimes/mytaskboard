@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { DragDropProvider, useDraggable, useDroppable } from '@dnd-kit/react'
 import supabase from './supabaseClient'
+import 'emoji-picker-element'
 import './index.css'
 
 const DEFAULT_COLUMN_COLORS = {
@@ -15,7 +16,7 @@ const COLORS = {
     2 : 'rgb(96, 193, 63)',
 }
 
-function TaskCard({ task, onClick, color }) {
+function TaskCard({ task, onClick }) {
     const { isDragging, ref } = useDraggable({ id: task.id })
 
     let dueLabel = null
@@ -85,6 +86,8 @@ function EditTaskForm({ task, columns, onTaskUpdated, onCancel, onDelete }) {
         due_date: task.due_date,
         description: task.description || '',
     })
+
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const handleChange = (field) => (event) => {
         setFormData((prev) => ({ ...prev, [field]: event.target.value }))
@@ -213,6 +216,7 @@ export function ProfileMenu({ claims, onLogout }) {
 
 function NewTaskForm({ userId, columns, defaultStatus, onTaskCreated, onCancel }) {
     const [formData, setFormData] = useState({
+        emoji: '',
         title: '',
         status: defaultStatus || '',
         due_date: '',
@@ -224,6 +228,8 @@ function NewTaskForm({ userId, columns, defaultStatus, onTaskCreated, onCancel }
     }
 
     const [saving, setSaving] = useState(false)
+    const [emojiPicker, setEmojiPicker] = useState(false)
+    const [errorMessage, setErrorMessage] = useState(null)
 
     const handleSubmit = async (event) => {
         event.preventDefault()
@@ -255,14 +261,18 @@ function NewTaskForm({ userId, columns, defaultStatus, onTaskCreated, onCancel }
 
     return (
         <form onSubmit={handleSubmit} className='task-card'>
-            <input
-                type="text"
-                className='task-title-input'
-                placeholder="Task title"
-                value={formData.title}
-                required
-                onChange={handleChange('title')}
-            />
+            <div style={{display: 'flex', position: 'relative'}}>
+                <button className='emoji-section' type="button" onClick={() => setEmojiPicker((prev) => !prev)}>☺︎</button>
+                {emojiPicker && <emoji-picker className='emoji' style={{position: 'absolute', left: '36px'}}></emoji-picker>}
+                <input
+                    type="text"
+                    className='task-title-input'
+                    placeholder="Task title"
+                    value={formData.title}
+                    required
+                    onChange={handleChange('title')}
+                />
+            </div>
             <select className='task-select-text' value={formData.status} required onChange={handleChange('status')}>
                 <option value="" disabled>Status</option>
                 {columns.map((col) => (
